@@ -1,5 +1,5 @@
 import {CATALOG,sheetCsvUrl} from '../js/catalog.js';
-import {parseCsv,timetableStats} from '../js/timetable.js';
+import {parseCsv,timetableStats} from '../js/timetable-safe.js';
 
 const response=await fetch(sheetCsvUrl(),{cache:'no-store'});
 if(!response.ok)throw new Error(`Live timetable source returned HTTP ${response.status}`);
