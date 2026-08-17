@@ -1,32 +1,69 @@
-name: Deploy SaiU V2
+name: SaiU V2 Production Build
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
-  pages: write
-  id-token: write
+
+env:
+  NODE_VERSION: 22
+
 concurrency:
-  group: pages
+  group: production-build
   cancel-in-progress: true
+
 jobs:
-  build:
+  production:
+    name: Production validation + artifact
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Verify runtime
+        run: node --version && npm --version
+
+      - name: Run full automated tests
+        run: npm test
+
+      - name: Run full syntax + source checks
+        run: npm run check
+
+      - name: Validate production files
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(index.html manifest.json styles.css sw.js package.json README.md SECURITY.md)
+          for file in "${required[@]}"; do
+            test -f "$file"
+          done
+          node -e "const m=require('./manifest.json'); if(!m.name||!m.start_url||!m.display) process.exit(1)"
+          ! grep -RInE '(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|AIza[0-9A-Za-z_-]{20,}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,})' --exclude-dir=.git .
+
+      - name: Build immutable release archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf release
+          mkdir -p release
+          cp -R index.html styles.css manifest.json sw.js js docs README.md SECURITY.md release/
+          tar -czf saiu-v2-production.tar.gz -C release .
+          sha256sum saiu-v2-production.tar.gz > saiu-v2-production.sha256
+
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: .
-  deploy:
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          name: saiu-v2-production-${{ github.sha }}
+          path: |
+            saiu-v2-production.tar.gz
+            saiu-v2-production.sha256
+          if-no-files-found: error
+          retention-days: 30
