@@ -15,9 +15,9 @@ test('canonical state keeps tasks, XP, attendance, exams and badges connected',(
   setAttendance('Algorithms',8,10);
   addExam({name:'AI',date:'2099-01-02'});
   for(let i=0;i<9;i++)addTask(`Task ${i}`);
-  awardXp(50,'test-bonus');
+  awardXp(100,'test-bonus');
   const snapshot=progressSnapshot();
-  assert.equal(snapshot.xp,100);
+  assert.equal(snapshot.xp,105);
   assert.ok(snapshot.badges.includes('100 XP'));
   assert.ok(snapshot.badges.includes('Task Crusher'));
   const state=load();
@@ -26,19 +26,6 @@ test('canonical state keeps tasks, XP, attendance, exams and badges connected',(
   assert.equal(state.tasks.length,10);
 });
 
-test('attendance rejects impossible attended totals',()=>{
-  storage.clear();
-  assert.throws(()=>attendanceStatus(11,10),/cannot exceed total/i);
-});
-
-test('study plans contain only useful positive-duration entries',()=>{
-  storage.clear();
-  const plan=buildStudyPlan([{id:'e',name:'AI',date:'2099-01-02'}],()=>[],7,new Date('2099-01-01T00:00:00'));
-  assert.deepEqual(plan,[]);
-});
-
-test('flat timetable parser preserves section selections',()=>{
-  const csv='day,start,end,course,room,teacher,section\nMonday,09:00,10:00,A,R,T,2\nMonday,10:00,11:00,B,R,T,3';
-  assert.equal(parseCsv(csv,{section:2}).length,1);
-  assert.equal(parseCsv(csv,{section:3})[0].course,'B');
-});
+test('attendance rejects impossible attended totals',()=>{storage.clear();assert.throws(()=>attendanceStatus(11,10),/cannot exceed total/i)});
+test('study plans contain only useful positive-duration entries',()=>{storage.clear();const plan=buildStudyPlan([{id:'e',name:'AI',date:'2099-01-02'}],()=>[],7,new Date('2099-01-01T00:00:00'));assert.deepEqual(plan,[])});
+test('flat timetable parser preserves section selections',()=>{const csv='day,start,end,course,room,teacher,section\nMonday,09:00,10:00,A,R,T,2\nMonday,10:00,11:00,B,R,T,3';assert.equal(parseCsv(csv,{section:2}).length,1);assert.equal(parseCsv(csv,{section:3})[0].course,'B')});
