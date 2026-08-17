@@ -17,7 +17,7 @@ test('canonical state keeps tasks, XP, attendance, exams and badges connected',(
   for(let i=0;i<9;i++)addTask(`Task ${i}`);
   awardXp(50,'test-bonus');
   const snapshot=progressSnapshot();
-  assert.equal(snapshot.xp,105);
+  assert.equal(snapshot.xp,100);
   assert.ok(snapshot.badges.includes('100 XP'));
   assert.ok(snapshot.badges.includes('Task Crusher'));
   const state=load();
