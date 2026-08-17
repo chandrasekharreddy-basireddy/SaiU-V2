@@ -1,13 +1,15 @@
 import {schoolById,yearById,sheetCsvUrl} from './catalog.js';
 import {parseCsv,SAMPLE,timetableStats} from './timetable.js';
 const KEY='saiu-v2-timetable-cache';
+const REMOTE_TIMEOUT_MS=12000;
 const normalizeSelection=selection=>({schoolId:selection?.schoolId||'scds',yearId:selection?.yearId||'',section:selection?.section==null||selection?.section===''?null:String(selection.section)});
 const sameSelection=(a,b)=>{const x=normalizeSelection(a),y=normalizeSelection(b);return x.schoolId===y.schoolId&&x.yearId===y.yearId&&x.section===y.section};
 function validatePayload(items,selection){if(!Array.isArray(items)||!items.length)throw new Error('No classes matched this selection');const stats=timetableStats(items);if(stats.classes>5000)throw new Error('Timetable source returned an unexpectedly large dataset');for(const c of items){if(!c.day||!c.start||!c.end||!c.course)throw new Error('Timetable source contains an invalid class row')}return {selection:normalizeSelection(selection),timetable:items};}
+async function fetchText(url){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),REMOTE_TIMEOUT_MS);try{const r=await fetch(url,{cache:'no-store',signal:controller.signal});if(!r.ok)throw new Error(`Timetable source returned HTTP ${r.status}`);return await r.text()}catch(error){if(error?.name==='AbortError')throw new Error('Timetable source request timed out');throw error}finally{clearTimeout(timer)}}
 export async function loadRemoteTimetable(selection={}){
  const normalized=normalizeSelection(selection); const school=schoolById(normalized.schoolId); const year=yearById(school,normalized.yearId);
  const options={school:school.short,mandatory:year?.mandatory||[],electives:(year?.electives||[]).map(label=>({id:label.toLowerCase().replace(/[^a-z0-9]+/g,'-'),label})),section:normalized.section};
- try{const r=await fetch(sheetCsvUrl(),{cache:'no-store'});if(!r.ok)throw new Error(`Timetable source returned HTTP ${r.status}`);const parsed=parseCsv(await r.text(),options);const safe=validatePayload(parsed,normalized);const payload={savedAt:Date.now(),...safe,sourceUrl:sheetCsvUrl()};localStorage.setItem(KEY,JSON.stringify(payload));return {timetable:safe.timetable,source:'live',savedAt:payload.savedAt,selection:safe.selection};}
+ try{const parsed=parseCsv(await fetchText(sheetCsvUrl()),options);const safe=validatePayload(parsed,normalized);const payload={savedAt:Date.now(),...safe,sourceUrl:sheetCsvUrl()};localStorage.setItem(KEY,JSON.stringify(payload));return {timetable:safe.timetable,source:'live',savedAt:payload.savedAt,selection:safe.selection};}
  catch(error){const cached=readCached(normalized);if(cached)return {...cached,source:'offline-cache',error:String(error?.message||error)};return {timetable:SAMPLE,source:'demo',error:String(error?.message||error),selection:normalized}}
 }
 export function readCached(selection={}){try{const p=JSON.parse(localStorage.getItem(KEY)||'null');if(!p?.timetable?.length||!sameSelection(p.selection,selection))return null;const safe=validatePayload(p.timetable,p.selection);return {timetable:safe.timetable,savedAt:p.savedAt,selection:safe.selection};}catch{return null}}
