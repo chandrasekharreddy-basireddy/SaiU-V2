@@ -13,7 +13,7 @@ const jsFiles=files.filter(f=>f.endsWith('.js')||f.endsWith('.mjs'));
 for(const file of jsFiles){const r=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});if(r.status!==0)fail.push(`Syntax error: ${path.relative(root,file)}\n${r.stderr.trim()}`)}
 
 function resolveLocalImport(fromFile,specifier){if(!specifier.startsWith('.'))return null;const base=path.resolve(path.dirname(fromFile),specifier);const candidates=[base,`${base}.js`,`${base}.mjs`,`${base}.json`,path.join(base,'index.js'),path.join(base,'index.mjs')];return candidates.find(candidate=>fs.existsSync(candidate)&&fs.statSync(candidate).isFile())||false}
-for(const file of jsFiles){const source=fs.readFileSync(file,'utf8');for(const match of source.matchAll(/(?:import|export)\s+(?:[^'";]+?\s+from\s+)?["']([^"']+)["']/g)){const specifier=match[1];if(resolveLocalImport(file,specifier)===false)fail.push(`Broken local module import: ${path.relative(root,file)} -> ${specifier}`)}}
+for(const file of jsFiles){const source=fs.readFileSync(file,'utf8');for(const match of source.matchAll(/(?:import|export)\s+(?:[^'";]+?\s+from\s+)?["']([^"']+)["']/g)){const specifier=match[1];if(resolveLocalImport(file,specifier)===false)fail.push(`Broken local module import: ${path.relative(root,file)} -> ${specifier}`)}if(/<[^>]+\sstyle\s*=|\bstyle\s*=\s*["']/i.test(source))fail.push(`Inline style attribute found in executable source: ${path.relative(root,file)}`)}
 
 try{
   const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8'));
@@ -37,4 +37,4 @@ const forbidden=[/sk-[A-Za-z0-9_-]{20,}/,/AIza[0-9A-Za-z_-]{20,}/,/ghp_[A-Za-z0-
 for(const re of forbidden)if(re.test(source))fail.push(`Possible hard-coded secret detected: ${re}`);
 
 if(fail.length){console.error(`Production validation failed (${fail.length} issue${fail.length===1?'':'s'}):`);for(const item of fail)console.error(`\n- ${item}`);process.exit(1)}
-console.log(`Production validation passed: ${jsFiles.length} JavaScript modules checked, local imports resolved, required assets present, manifest valid, local HTML references resolved, CSP hardened, and secret-pattern scan clean.`);
+console.log(`Production validation passed: ${jsFiles.length} JavaScript modules checked, local imports resolved, required assets present, manifest valid, local HTML references resolved, CSP hardened, executable sources contain no inline styles, and secret-pattern scan clean.`);
