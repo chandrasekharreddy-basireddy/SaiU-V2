@@ -1,0 +1,25 @@
+node_modules/
+package-lock.json
+release/
+*.tar.gz
+*.sha256
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Playwright
+test-results/
+playwright-report/
