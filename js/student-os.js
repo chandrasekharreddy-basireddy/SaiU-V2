@@ -1,0 +1,40 @@
+import {academics,saveAcademics,setAttendance,removeAttendance,attendanceSummary,addExam,removeExam,upcomingExams,daysUntil,buildStudyPlan,saveStudyPlan} from './student.js';
+import {parseSharedSchedule,bestMeetingSlots} from './social.js';
+import {awardXp,recordActivity,progressSnapshot} from './gamification.js';
+import {classesForDay,freePeriods} from './timetable.js';
+
+const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const todayIso=()=>new Date().toISOString().slice(0,10);
+const dayFromIso=iso=>new Date(`${iso}T12:00:00`).toLocaleDateString('en-US',{weekday:'long'});
+function render(){
+  const main=document.querySelector('#main');
+  if(!main||document.querySelector('#student-os'))return;
+  const a=academics(),summary=attendanceSummary(),exams=upcomingExams(),p=progressSnapshot();
+  main.insertAdjacentHTML('beforeend',`<section id="student-os" class="student-os" aria-labelledby="student-os-title">
+    <div class="section-head"><div><span class="eyebrow">Student OS</span><h2 id="student-os-title">Academics, planning & collaboration</h2></div><span class="tag">${p.xp} XP · ${p.streak} day streak</span></div>
+    <div class="grid grid-2">
+      <section class="card"><h3>Attendance intelligence</h3><p class="muted">Target is ${a.attendanceTarget}%. Data stays in this browser.</p><form id="attendanceForm" class="ai-row"><input id="attendanceSubject" class="search" placeholder="Subject" required><input id="attendanceAttended" class="search" type="number" min="0" placeholder="Attended" required><input id="attendanceTotal" class="search" type="number" min="0" placeholder="Total" required><button class="primary">Save</button></form><div class="schedule">${summary.map(x=>`<div class="statline"><span><b>${esc(x.subject)}</b><br><small>${x.attended}/${x.total} classes</small></span><span><b>${x.pct.toFixed(1)}%</b> ${x.atRisk?`<span class="tag">At risk · ${x.classesNeeded} needed</span>`:'<span class="tag">On target</span>'}<button type="button" class="ghost" data-remove-attendance="${esc(x.subject)}">Remove</button></span></div>`).join('')||'<div class="empty">Add your attendance to get safe planning guidance.</div>'}</div></section>
+      <section class="card"><h3>Exam command center</h3><form id="examForm" class="ai-row"><input id="examName" class="search" placeholder="Exam name" required><input id="examDate" class="search" type="date" min="${todayIso()}" required><button class="primary">Add</button></form><div class="schedule">${exams.map(x=>`<div class="statline"><span><b>${esc(x.name)}</b>${x.course?` · ${esc(x.course)}`:''}<br><small>${esc(x.date)} · ${daysUntil(x.date)} day${daysUntil(x.date)===1?'':'s'} left</small></span><button type="button" class="ghost" data-remove-exam="${esc(x.id)}">Remove</button></div>`).join('')||'<div class="empty">No upcoming exams.</div>'}</div></section>
+      <section class="card"><h3>Study planner</h3><p class="muted">Builds a local 7-day plan around your timetable free periods and upcoming exams.</p><button type="button" class="primary" id="buildStudyPlan">Build my plan</button><div id="studyPlanOutput" class="schedule">${(a.studyPlans||[]).map(x=>`<div class="statline"><span>${esc(x.date)}</span><b>${esc(x.focus)} · ${x.minutes} min</b></div>`).join('')||'<div class="empty">No plan generated yet.</div>'}</div></section>
+      <section class="card"><h3>Find a time with a friend</h3><p class="muted">Paste a friend's schedule in CSV: day,start,end,course,room. Nothing is uploaded.</p><textarea id="friendSchedule" class="search" rows="5" placeholder="Monday,10:00,11:00,Machine Learning,B-201"></textarea><div class="chips"><button type="button" class="primary" id="compareFriend">Find common free time</button><button type="button" class="ghost" id="copyShareFormat">Copy my schedule format</button></div><div id="compareOutput" class="schedule"></div></section>
+    </div>
+    <section class="card"><div class="section-head"><div><h3>Privacy</h3><p class="muted">Academic, exam, streak and friend-schedule data is stored locally. SaiU V2 does not upload this dashboard's data.</p></div><button type="button" class="danger" id="clearStudentData">Clear Student OS data</button></div></section>
+  </section>`);
+  recordActivity();
+  bind();
+}
+function bind(){
+  const root=document.querySelector('#student-os');if(!root)return;
+  root.querySelector('#attendanceForm').addEventListener('submit',e=>{e.preventDefault();try{setAttendance(root.querySelector('#attendanceSubject').value,root.querySelector('#attendanceAttended').value,root.querySelector('#attendanceTotal').value);awardXp(5,'attendance-update');renderReplace();}catch(err){alert(err.message)}});
+  root.querySelectorAll('[data-remove-attendance]').forEach(b=>b.addEventListener('click',()=>{removeAttendance(b.dataset.removeAttendance);renderReplace()}));
+  root.querySelector('#examForm').addEventListener('submit',e=>{e.preventDefault();try{addExam({name:root.querySelector('#examName').value,date:root.querySelector('#examDate').value});awardXp(10,'exam-added');renderReplace()}catch(err){alert(err.message)}});
+  root.querySelectorAll('[data-remove-exam]').forEach(b=>b.addEventListener('click',()=>{removeExam(b.dataset.removeExam);renderReplace()}));
+  root.querySelector('#buildStudyPlan').addEventListener('click',()=>{const timetable=window.SaiU?.timetable||[];const plan=buildStudyPlan(upcomingExams(),iso=>freePeriods(timetable,dayFromIso(iso)).filter(x=>x.end-x.start>=30),7);saveStudyPlan(plan);awardXp(10,'study-plan');renderReplace()});
+  root.querySelector('#compareFriend').addEventListener('click',()=>{const friendText=root.querySelector('#friendSchedule').value;const out=root.querySelector('#compareOutput');try{const friend=parseSharedSchedule(friendText),mine=window.SaiU?.timetable||[],slots=bestMeetingSlots(mine,friend);out.innerHTML=slots.slice(0,8).map(x=>`<div class="statline"><span><b>${esc(x.day)}</b></span><b>${esc(x.label)} · ${x.duration} min</b></div>`).join('')||'<div class="empty">No 30+ minute common slots found.</div>'}catch{out.textContent='Could not parse the schedule. Use day,start,end,course,room rows.'}});
+  root.querySelector('#copyShareFormat').addEventListener('click',async()=>{const items=window.SaiU?.timetable||[];const text=['day,start,end,course,room',...items.map(c=>`${c.day},${c.start},${c.end},${String(c.course||'').replaceAll(',',' ')},${String(c.room||'').replaceAll(',',' ')}`)].join('\n');try{await navigator.clipboard.writeText(text);toast('Share format copied')}catch{toast('Clipboard unavailable')}});
+  root.querySelector('#clearStudentData').addEventListener('click',()=>{if(confirm('Clear attendance, exams and study plans from this browser?')){localStorage.removeItem('saiu-v2-academics');localStorage.removeItem('saiu-v2-gamification');renderReplace()}});
+}
+function toast(msg){const el=document.querySelector('#toast');if(el){el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200)}}
+function renderReplace(){document.querySelector('#student-os')?.remove();render()}
+const observer=new MutationObserver(()=>{const more=document.querySelector('.bottom-nav button.active[data-view="more"]');if(more)render()});
+observer.observe(document.body,{childList:true,subtree:true});
