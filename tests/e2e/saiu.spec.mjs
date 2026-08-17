@@ -12,7 +12,7 @@ test('home renders live timetable controls and navigation',async({page})=>{
   await expect(page).toHaveTitle('SaiU V2');
   await expect(page.locator('#main')).toContainText('Personal timetable');
   await expect(page.locator('#main')).toContainText('Live source');
-  await page.getByRole('button',{name:'Timetable'}).click();
+  await page.locator('.bottom-nav button[data-view="timetable"]').click();
   await expect(page.locator('#main')).toContainText('Timetable');
 });
 
@@ -34,9 +34,13 @@ test('planner accepts and completes a task',async({page})=>{
   await expect(page.locator('#main')).toContainText(/done/i);
 });
 
-test('security and accessibility baseline hold in a real browser',async({page})=>{
+test('security accessibility and performance baseline hold in a real browser',async({page})=>{
   const csp=await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
   expect(csp).toContain("script-src 'self'");
   await expect(page.getByRole('navigation',{name:'Primary navigation'})).toBeVisible();
   await expect(page.locator('main#main')).toHaveAttribute('tabindex','-1');
+  const navigation=await page.evaluate(()=>performance.getEntriesByType('navigation')[0]);
+  expect(navigation.domContentLoadedEventEnd).toBeLessThan(2000);
+  await page.keyboard.press('Tab');
+  await expect(page.locator(':focus')).toHaveCount(1);
 });
