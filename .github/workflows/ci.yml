@@ -1,14 +1,14 @@
 name: SaiU V2 CI
 on:
   push:
-    branches: [main]
+    branches: [main, 'release/**']
   pull_request:
     branches: [main]
 permissions:
   contents: read
 concurrency:
   group: quality-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   quality:
     runs-on: ubuntu-latest
