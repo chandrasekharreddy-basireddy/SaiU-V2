@@ -10,7 +10,7 @@ import {loadRemoteTimetable,clearRemoteCache} from './remote.js';
 
 load();let timetable=SAMPLE;let aiBusy=false;let deferredInstall=null;let source='demo';let loading=true;let refreshToken=0;
 const main=document.querySelector('#main'),toastEl=document.querySelector('#toast');
-const esc=s=>String(s??'').replace(/[&<>\\"]/g,c=>({'&':'&','<':'<','>':'>','"':'"'}[c]));
+const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dayName=()=>new Date().toLocaleDateString('en-US',{weekday:'long'});
 function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>toastEl.classList.remove('show'),2600)}
 function selection(){const schoolId=localStorage.getItem('saiu_school')||CATALOG.schools[0].id;const school=schoolById(schoolId);const yearId=localStorage.getItem('saiu_year')||school.years[0]?.id;const year=yearById(school,yearId);const section=localStorage.getItem('saiu_section')||year?.sections?.[0]||null;return {schoolId,yearId:year?.id,section}}
