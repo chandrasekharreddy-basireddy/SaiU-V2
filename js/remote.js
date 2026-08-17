@@ -1,5 +1,5 @@
 import {schoolById,yearById,sheetCsvUrl} from './catalog.js';
-import {parseCsv,SAMPLE,timetableStats} from './timetable.js';
+import {parseCsv,SAMPLE,timetableStats} from './timetable-safe.js';
 const KEY='saiu-v2-timetable-cache-v2';
 const LEGACY_KEY='saiu-v2-timetable-cache';
 const REMOTE_TIMEOUT_MS=12000;const MAX_CACHE_ENTRIES=20;const MAX_REMOTE_CHARS=1_500_000;const MAX_CACHE_CHARS=900_000;
