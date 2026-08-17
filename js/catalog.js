@@ -2,7 +2,7 @@ export const CATALOG={
   source:{sheetId:'1Jk3KCLqHHzi-jxigIcPpcXZestcxb8Y0BeQLjhiezb8',gid:'0'},
   schools:[
     {id:'scds',name:'School of Computing & Data Science',short:'SCDS',years:[
-      {id:'scds-2',label:'Year 2',level:2,sections:[1,2,3,4,5,6,7],electives:[
+      {id:'scds-2',label:'Year 2',level:2,sections:[],electives:[
         'Intelligent Embedded Systems','Emerging Tools and Applications','Fundamentals of Business Organization & Management','Forensic Psychology'
       ]},
       {id:'scds-3',label:'Year 3',level:3,sections:[],mandatory:['Deep Learning','Theory of Computation'],electives:[
@@ -13,7 +13,7 @@ export const CATALOG={
       {id:'soai-2',label:'Year 2',level:2,sections:[],mandatory:['Differential Equations','Frontiers of Machine Learning','Discrete Mathematics','Image Processing','Human AI Interaction'],electives:['Intelligent Embedded Systems','Forensic Psychology']}
     ]},
     {id:'sob',name:'School of Business',short:'SOB',years:[
-      {id:'sob-2',label:'Year 2',level:2,sections:['BBA','B.Com'],mandatory:['Corporate and Business Law','Operations Research','Human Resource Management','Principles in Financial Management','Principles of Financial Management','Financial Reporting and Analysis']}
+      {id:'sob-2',label:'Year 2',level:2,sections:[],tracks:['BBA','B.Com'],mandatory:['Corporate and Business Law','Operations Research','Human Resource Management','Principles in Financial Management','Principles of Financial Management','Financial Reporting and Analysis']}
     ]},
     {id:'sol',name:'School of Law',short:'SOL',years:[{id:'sol-2',label:'Year 2',level:2,sections:[],sectionsOptional:true}]},
     {id:'sop',name:'School of Psychology',short:'SOP',years:[{id:'sop-2',label:'Year 2',level:2,sections:[]}]}
