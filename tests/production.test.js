@@ -9,12 +9,12 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 
 function has(html,needle){assert.ok(html.includes(needle),`Expected ${needle}`)}
 
-test('security headers and no inline executable handlers', ()=>{
+test('security headers and no inline executable handlers',()=>{
  const html=read('index.html');
  has(html,'Content-Security-Policy');
  assert.match(html,/style-src 'self'/);
  assert.doesNotMatch(html,/style-src[^;]*'unsafe-inline'/i);
- assert.doesNotMatch(html,/\son[a-z]+\s*=\s*[\'\"]/i);
+ assert.doesNotMatch(html,/\son[a-z]+\s*=\s*['"]/i);
  assert.doesNotMatch(html,/javascript:/i);
  has(html,'icons/icon.svg');
 });
@@ -48,7 +48,7 @@ test('HTML accessibility fundamentals exist',()=>{
  has(html,'tabindex="-1"');
 });
 
-test('live timetable integration points at the configured published source', ()=>{
+test('live timetable integration points at the configured published source',()=>{
  const catalog=read('js/catalog.js');
  const remote=read('js/remote.js');
  assert.match(catalog,/docs\.google\.com\/spreadsheets\/d\//);
