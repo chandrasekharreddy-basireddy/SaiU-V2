@@ -25,11 +25,12 @@ test('manifest references an existing production icon',()=>{
  for(const icon of manifest.icons)assert.ok(fs.existsSync(path.join(root,icon.src.replace(/^\.\//,''))),icon.src);
 });
 
-test('offline shell contains the bootstrap and icon assets',()=>{
+test('offline shell contains every browser module imported by bootstrap',()=>{
  const sw=read('sw.js');
  has(sw,'./js/bootstrap.js');
+ has(sw,'./js/student-os.js');
  has(sw,'./icons/icon.svg');
- assert.match(sw,/saiu-v2-v4/);
+ assert.match(sw,/saiu-v2-v5/);
 });
 
 test('performance budgets stay bounded',()=>{
