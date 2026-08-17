@@ -16,3 +16,5 @@ jobs:
       - run: npm run check
       - name: Validate required PWA files
         run: test -f index.html && test -f manifest.json && test -f sw.js && test -f styles.css
+      - name: Validate critical modules
+        run: node --check js/catalog.js && node --check js/remote.js && grep -q 'serviceWorker' index.html && grep -q 'start_url' manifest.json
