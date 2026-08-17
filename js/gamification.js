@@ -1,11 +1,11 @@
-import {load,patch,addXp as addStateXp} from './store.js';
+import {load,patch} from './store.js';
 import {academics} from './student.js';
 const LEGACY='saiu-v2-gamification';
 function migrateLegacy(){
   const current=load();
   try{
     const legacy=JSON.parse(localStorage.getItem(LEGACY)||'null');
-    if(legacy&&typeof legacy==='object'&&current.xp===0&&Number(legacy.xp)>0){patch({xp:Number(legacy.xp)||0,streak:Number(legacy.streak)||0,lastOpen:legacy.lastActive||null});}
+    if(legacy&&typeof legacy==='object'&&current.xp===0&&Number(legacy.xp)>0)patch({xp:Number(legacy.xp)||0,streak:Number(legacy.streak)||0,lastOpen:legacy.lastActive||null});
     if(legacy)localStorage.removeItem(LEGACY);
   }catch{localStorage.removeItem(LEGACY)}
   return load();
@@ -27,14 +27,14 @@ export function badges(state=gameState()){
 export function awardXp(amount,event='general'){
   const n=Math.max(0,Math.min(100,Number(amount)||0));
   const s=load();
-  if(!s.__xpEvents||typeof s.__xpEvents!=='object')s.__xpEvents={};
+  const ledger=s.__xpEvents&&typeof s.__xpEvents==='object'?{...s.__xpEvents}:{};
   const today=new Date().toISOString().slice(0,10);
-  const dayEvents=Array.isArray(s.__xpEvents[today])?s.__xpEvents[today]:[];
+  const dayEvents=Array.isArray(ledger[today])?ledger[today]:[];
   if(dayEvents.includes(event))return s.xp;
-  s.__xpEvents[today]=[...dayEvents,event];
+  ledger[today]=[...dayEvents,event];
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-60);
-  for(const day of Object.keys(s.__xpEvents)){if(new Date(`${day}T00:00:00`)<cutoff)delete s.__xpEvents[day]}
-  return addStateXp(n)||load().xp;
+  for(const day of Object.keys(ledger)){if(new Date(`${day}T00:00:00`)<cutoff)delete ledger[day]}
+  return patch({xp:s.xp+n,__xpEvents:ledger}).xp;
 }
 export function recordActivity(date=new Date()){
   const s=load();
@@ -47,4 +47,4 @@ export function recordActivity(date=new Date()){
   patch({streak,lastOpen:dayIso});
   return streak;
 }
-export function progressSnapshot(){const s=load();const l=level(s.xp);return {xp:s.xp,level:l,title:title(l),progress:progress(s.xp),toNext:100-progress(s.xp),streak:s.streak,badges:badges(s)}}
+export function progressSnapshot(){const s=load();const l=level(s.xp);return {xp:s.xp,level:l,title:title(l),progress:progress(l? s.xp:0),toNext:100-progress(s.xp),streak:s.streak,badges:badges(s)}}
