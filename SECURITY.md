@@ -1,5 +1,11 @@
 # Security
 
+## Reporting a vulnerability
+
+Report security issues privately via [GitHub Security Advisories](https://github.com/chandrasekharreddy-basireddy/SaiU-V2/security/advisories/new) rather than publishing exploit details in a public issue.
+
+## Guidelines
+
 - Never put OpenAI, Anthropic, Gemini, database, or n8n credentials in browser code.
 - The optional `saiu_ai_endpoint` setting is a public endpoint address, not a secret.
 - Use a server-side gateway for authenticated AI requests and rate limiting.
