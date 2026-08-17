@@ -1,7 +1,7 @@
 name: SaiU V2 Production Build
 on:
   push:
-    branches: [main]
+    branches: [main, 'security-hunt-**']
   workflow_dispatch:
 
 permissions:
