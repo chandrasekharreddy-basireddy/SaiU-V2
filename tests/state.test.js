@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 const storage=new Map();
 globalThis.localStorage={getItem:key=>storage.has(key)?storage.get(key):null,setItem:(key,value)=>storage.set(key,String(value)),removeItem:key=>storage.delete(key),clear:()=>storage.clear()};
-const {load,addTask,awardXp}=await import('../js/store.js');
+const {load,addTask,toggleTask,awardXp}=await import('../js/store.js');
 const {attendanceStatus,setAttendance,addExam,buildStudyPlan}=await import('../js/student.js');
 const {progressSnapshot}=await import('../js/gamification.js');
 const {parseCsv}=await import('../js/timetable.js');
@@ -14,16 +14,19 @@ test('canonical state keeps tasks, XP, attendance, exams and badges connected',(
   addTask('Ship release');
   setAttendance('Algorithms',8,10);
   addExam({name:'AI',date:'2099-01-02'});
-  for(let i=0;i<9;i++)addTask(`Task ${i}`);
+  const ids=[];
+  for(let i=0;i<9;i++){addTask(`Task ${i}`)}
+  ids.push(...load().tasks.map(t=>t.id));
+  for(const id of ids)toggleTask(id);
   awardXp(100,'test-bonus');
   const snapshot=progressSnapshot();
-  assert.equal(snapshot.xp,105);
+  assert.equal(snapshot.xp,115);
   assert.ok(snapshot.badges.includes('100 XP'));
   assert.ok(snapshot.badges.includes('Task Crusher'));
   const state=load();
   assert.equal(state.attendance.Algorithms.attended,8);
   assert.equal(state.exams.length,1);
-  assert.equal(state.tasks.length,10);
+  assert.equal(state.tasks.filter(t=>t.done).length,10);
 });
 
 test('attendance rejects impossible attended totals',()=>{storage.clear();assert.throws(()=>attendanceStatus(11,10),/cannot exceed total/i)});
