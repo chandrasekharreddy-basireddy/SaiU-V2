@@ -1,3 +1,5 @@
+import './student-os.js';
+
 const isLocalHost=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
 const modal=document.querySelector('#modal');
 const close=document.querySelector('#modalClose');
