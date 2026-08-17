@@ -101,7 +101,7 @@ test('iCalendar escapes special text and emits CRLF records', () => {
   const text=ics([{id:'x,1',day:'Monday',start:'09:00',end:'10:00',course:'AI, Ethics; Intro',room:'B\\201, Lab',code:'AI;301',teacher:'Prof, A'}]);
   assert.match(text,/SUMMARY:AI\\, Ethics\\; Intro/);
   assert.match(text,/LOCATION:B\\\\201\\, Lab/);
-  assert.match(text,/DESCRIPTION:AI\\;301 \\x2014 Prof\\, A/);
+  assert.match(text,/DESCRIPTION:AI\\;301 — Prof\\, A/);
   assert.ok(text.endsWith('\r\n'));
   assert.match(text,/BEGIN:VEVENT\r\n/);
 });
