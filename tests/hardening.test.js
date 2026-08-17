@@ -18,15 +18,21 @@ import {
 test('time conversion preserves valid 24-hour boundaries', () => {
   assert.equal(toMinutes('00:00'), 0);
   assert.equal(toMinutes('23:59'), 1439);
+  assert.ok(Number.isNaN(toMinutes('24:00')));
+  assert.ok(Number.isNaN(toMinutes('12:60')));
   assert.equal(fmtMinutes(0), '00:00');
   assert.equal(fmtMinutes(1439), '23:59');
+  assert.equal(fmtMinutes(1440), '00:00');
   assert.equal(duration({start:'09:15', end:'10:45'}), 90);
+  assert.equal(duration({start:'bad', end:'10:45'}), 0);
 });
 
-test('time parser handles common academic timetable formats', () => {
+test('time parser handles common academic timetable formats and rejects invalid ranges', () => {
   assert.deepEqual(parseTimeRange('9:00 AM - 10:30 AM'), {start:'09:00', end:'10:30'});
   assert.deepEqual(parseTimeRange('2 PM to 3:30 PM'), {start:'14:00', end:'15:30'});
   assert.deepEqual(parseTimeRange('09:00-10:00'), {start:'09:00', end:'10:00'});
+  assert.equal(parseTimeRange('25:00-26:00'), null);
+  assert.equal(parseTimeRange('9:61 AM - 10:30 AM'), null);
   assert.equal(parseTimeRange('not a time'), null);
 });
 
@@ -49,6 +55,7 @@ test('free-time engine never returns inverted or zero-length slots', () => {
     assert.ok(slot.start >= 8 * 60);
     assert.ok(slot.end <= 18 * 60);
   }
+  assert.deepEqual(freePeriods(SAMPLE,'Monday',18*60,20*60), [{start:1080,end:1200}]);
 });
 
 test('common-free engine returns true intersections', () => {
@@ -67,23 +74,24 @@ test('CSV parser rejects incomplete rows without crashing', () => {
     'day,start,end,course,room,teacher,section',
     'Monday,09:00,10:00,Algorithms,A-101,Faculty,3',
     'BadDay,09:00,10:00,Ignored,A-102,Faculty,3',
-    ',,,,,'
+    ',,,,,',
   ].join('\n');
   const parsed = parseCsv(csv, {school:'SCDS', section:3});
   assert.equal(parsed.length, 1);
   assert.equal(parsed[0].course, 'Algorithms');
 });
 
-test('CSV parser handles quoted commas and section filtering', () => {
+test('CSV parser handles quoted commas, BOM headers, normalization and section filtering', () => {
   const csv = [
-    'day,start,end,course,room,teacher,section',
-    'Tuesday,09:00,10:00,"AI, Ethics",B-101,Faculty A,2',
+    '\uFEFFday,start,end,course,room,teacher,section',
+    ' tuesday ,09:00,10:00,"AI, Ethics",B-101,Faculty A,2',
     'Tuesday,10:00,11:00,"AI, Ethics",B-102,Faculty B,3'
   ].join('\n');
   const parsed = parseCsv(csv, {section:3});
   assert.equal(parsed.length, 1);
   assert.equal(parsed[0].course, 'AI, Ethics');
   assert.equal(parsed[0].section, 3);
+  assert.equal(parsed[0].day, 'Tuesday');
 });
 
 test('current and next class are deterministic for supplied clock values', () => {
