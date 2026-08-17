@@ -58,11 +58,18 @@ The V2 loader reads the published Sai University Google Sheet as CSV using the c
 ## Development
 
 ```bash
-npm test
-npm run check
+npm test       # run the automated test suite
+npm run check  # run full source validation (syntax, imports, CSP, secrets)
 ```
 
 No frontend secrets are required. An optional AI endpoint can be configured in **More → AI endpoint**, and it must use HTTPS.
+
+### Contributing
+
+1. Fork the repository and create a feature branch.
+2. Run `npm test` and `npm run check` before submitting a PR.
+3. Ensure no inline styles, inline event handlers, or `javascript:` URLs are added.
+4. Do not commit secrets, API keys, or private keys.
 
 ## Architecture
 
@@ -70,17 +77,22 @@ No frontend secrets are required. An optional AI endpoint can be configured in *
 index.html
 styles.css
 js/
-  app.js          application shell and views
-  catalog.js      SaiU school/year/source catalog
-  remote.js       live source + offline cache
-  timetable.js    parser + timetable intelligence
-  ai.js           local-first assistant + optional gateway
-  store.js        persistent student state
-  calendar.js     ICS export
-  notifications.js PWA notifications
-  gamification.js XP/levels/badges
-  navigation.js   view navigation
-sw.js             offline shell and runtime cache
+  app.js            application shell and views
+  bootstrap.js      service worker + student-os init
+  catalog.js        SaiU school/year/source catalog
+  remote.js         live source + offline cache
+  timetable.js      parser + timetable intelligence
+  timetable-safe.js hardened input adapter (wraps timetable.js)
+  ai.js             local-first assistant + optional gateway
+  store.js          persistent student state
+  student.js        attendance, exams, study planner
+  student-os.js     Student OS dashboard (academics + collaboration)
+  social.js         schedule sharing + common-free-time
+  calendar.js       ICS export
+  notifications.js  PWA notifications
+  gamification.js   XP/levels/badges
+  navigation.js     view navigation
+sw.js               offline shell and runtime cache
 ```
 
 ## License
