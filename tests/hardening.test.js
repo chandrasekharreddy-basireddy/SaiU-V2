@@ -14,6 +14,7 @@ import {
   nextClass,
   timetableStats
 } from '../js/timetable.js';
+import {ics} from '../js/calendar.js';
 
 test('time conversion preserves valid 24-hour boundaries', () => {
   assert.equal(toMinutes('00:00'), 0);
@@ -33,6 +34,8 @@ test('time parser handles common academic timetable formats and rejects invalid 
   assert.deepEqual(parseTimeRange('09:00-10:00'), {start:'09:00', end:'10:00'});
   assert.equal(parseTimeRange('25:00-26:00'), null);
   assert.equal(parseTimeRange('9:61 AM - 10:30 AM'), null);
+  assert.equal(parseTimeRange('10:00-09:00'), null);
+  assert.equal(parseTimeRange('10 PM-11 PM'), null);
   assert.equal(parseTimeRange('not a time'), null);
 });
 
@@ -92,6 +95,15 @@ test('CSV parser handles quoted commas, BOM headers, normalization and section f
   assert.equal(parsed[0].course, 'AI, Ethics');
   assert.equal(parsed[0].section, 3);
   assert.equal(parsed[0].day, 'Tuesday');
+});
+
+test('iCalendar escapes special text and emits CRLF records', () => {
+  const text=ics([{id:'x,1',day:'Monday',start:'09:00',end:'10:00',course:'AI, Ethics; Intro',room:'B\\201, Lab',code:'AI;301',teacher:'Prof, A'}]);
+  assert.match(text,/SUMMARY:AI\\, Ethics\\; Intro/);
+  assert.match(text,/LOCATION:B\\\\201\\, Lab/);
+  assert.match(text,/DESCRIPTION:AI\\;301 \\x2014 Prof\\, A/);
+  assert.ok(text.endsWith('\r\n'));
+  assert.match(text,/BEGIN:VEVENT\r\n/);
 });
 
 test('current and next class are deterministic for supplied clock values', () => {
