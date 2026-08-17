@@ -56,7 +56,8 @@ jobs:
           cp -R index.html styles.css manifest.json sw.js js docs README.md SECURITY.md LICENSE icons package.json release/
           test -f release/icons/icon.svg
           tar -czf saiu-v2-production.tar.gz -C release .
-          tar -tzf saiu-v2-production.tar.gz | grep -q 'icons/icon.svg'
+          tar -tzf saiu-v2-production.tar.gz > /tmp/tar-contents.txt
+          grep 'icons/icon.svg' /tmp/tar-contents.txt
           sha256sum saiu-v2-production.tar.gz > saiu-v2-production.sha256
 
       - name: Upload production artifact
