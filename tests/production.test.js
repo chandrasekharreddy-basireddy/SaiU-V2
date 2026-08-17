@@ -22,10 +22,10 @@ test('security headers and no inline executable handlers', ()=>{
 test('manifest references an existing production icon',()=>{
  const manifest=JSON.parse(read('manifest.json'));
  assert.ok(Array.isArray(manifest.icons)&&manifest.icons.length>0);
- for(const icon of manifest.icons)assert.ok(fs.existsSync(path.join(root,icon.src.replace(/^\.\//,'')))), icon.src);
+ for(const icon of manifest.icons)assert.ok(fs.existsSync(path.join(root,icon.src.replace(/^\.\//,''))),icon.src);
 });
 
-test('offline shell contains every browser module imported by bootstrap', ()=>{
+test('offline shell contains every browser module imported by bootstrap',()=>{
  const sw=read('sw.js');
  has(sw,'./js/bootstrap.js');
  has(sw,'./js/student-os.js');
