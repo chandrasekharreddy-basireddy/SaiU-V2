@@ -14,18 +14,33 @@
 </head>
 <body>
   <div id="app" class="shell">
-    <header class="topbar">
-      <button type="button" class="brand" data-view="home" aria-label="SaiU home"><span class="brand-mark">S</span><span>SaiU <b>V2</b></span></button>
-      <div class="top-actions"><button type="button" id="installBtn" class="ghost hidden">Install</button><button type="button" id="themeBtn" class="icon-btn" aria-label="Toggle theme">◐</button></div>
-    </header>
-    <main id="main" class="main" tabindex="-1"></main>
-    <nav class="bottom-nav" aria-label="Primary navigation">
-      <button type="button" data-view="home">⌂<span>Home</span></button>
-      <button type="button" data-view="timetable">▦<span>Timetable</span></button>
-      <button type="button" data-view="ai">✦<span>Ask AI</span></button>
-      <button type="button" data-view="planner">✓<span>Planner</span></button>
-      <button type="button" data-view="more">•••<span>More</span></button>
-    </nav>
+    <aside class="sidebar" aria-label="SaiU navigation">
+      <button type="button" class="sidebar-brand brand" data-view="home" aria-label="SaiU home"><span class="brand-mark">S</span><span>SaiU <b>V2</b></span></button>
+      <div class="sidebar-label">Main</div>
+      <nav class="sidebar-nav">
+        <button type="button" data-view="home">▣<span>Dashboard</span></button>
+        <button type="button" data-view="timetable">▦<span>Timetable</span></button>
+        <button type="button" data-view="planner">✓<span>Planner</span></button>
+        <button type="button" data-view="ai">✦<span>AI Assistant</span></button>
+        <button type="button" data-view="more">•••<span>More</span></button>
+      </nav>
+      <div class="sidebar-bottom"><span class="sidebar-avatar">S</span><div><b>SaiU Student</b><small>Academic workspace</small></div></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button type="button" class="mobile-menu brand" data-view="home" aria-label="SaiU home"><span class="brand-mark">S</span><span>SaiU <b>V2</b></span></button>
+        <div class="top-context"><span class="eyebrow">Student workspace</span><span class="top-live"><i></i> Live-ready</span></div>
+        <div class="top-actions"><button type="button" id="installBtn" class="ghost hidden">Install</button><button type="button" id="themeBtn" class="icon-btn" aria-label="Toggle theme">◐</button></div>
+      </header>
+      <main id="main" class="main" tabindex="-1"></main>
+      <nav class="bottom-nav" aria-label="Primary navigation">
+        <button type="button" data-view="home">⌂<span>Home</span></button>
+        <button type="button" data-view="timetable">▦<span>Timetable</span></button>
+        <button type="button" data-view="ai">✦<span>AI</span></button>
+        <button type="button" data-view="planner">✓<span>Tasks</span></button>
+        <button type="button" data-view="more">•••<span>More</span></button>
+      </nav>
+    </div>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <dialog id="modal" class="modal"><div id="modalContent"></div><button type="button" id="modalClose" class="modal-close">Close</button></dialog>
