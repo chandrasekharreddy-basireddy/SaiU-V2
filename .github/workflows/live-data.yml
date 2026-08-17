@@ -6,8 +6,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: live-data-smoke
-  cancel-in-progress: true
+  group: live-data-smoke-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   live-data:
     runs-on: ubuntu-latest
