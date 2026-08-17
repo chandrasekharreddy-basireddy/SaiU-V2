@@ -55,7 +55,11 @@ test('common-free engine returns true intersections', () => {
   const a = [{day:'Monday',start:'09:00',end:'10:00',course:'A'}];
   const b = [{day:'Monday',start:'11:00',end:'12:00',course:'B'}];
   const common = commonFree(a, b, 'Monday', 8 * 60, 13 * 60);
-  assert.deepEqual(common, [{start:600,end:660,duration:60},{start:720,end:780,duration:60}]);
+  assert.deepEqual(common, [
+    {start:480,end:540,duration:60},
+    {start:600,end:660,duration:60},
+    {start:720,end:780,duration:60}
+  ]);
 });
 
 test('CSV parser rejects incomplete rows without crashing', () => {
