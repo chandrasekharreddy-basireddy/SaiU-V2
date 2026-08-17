@@ -1,11 +1,11 @@
 import {test,expect} from '@playwright/test';
 
-const fixture=`Monday,09:00-10:00,Artificial Intelligence @ Faculty A,Room A\n,,\nMonday,11:00-12:00,Database Systems @ Faculty B,Room B\nTuesday,10:00-11:30,Computer Networks @ Faculty C,Room C\nWednesday,14:00-15:00,Deep Learning @ Faculty D,Room D\n`;
+const fixture=`Monday,09:00-10:00,Intelligent Embedded Systems @ Faculty A,\n, ,Room A,\nMonday,11:00-12:00,Emerging Tools and Applications @ Faculty B,\n, ,Room B,\nTuesday,10:00-11:30,Forensic Psychology @ Faculty C,\n, ,Room C,\nWednesday,14:00-15:00,Intelligent Embedded Systems @ Faculty D,\n, ,Room D,\n`;
 
 test.beforeEach(async({page})=>{
   await page.route('https://docs.google.com/spreadsheets/**',async route=>route.fulfill({status:200,contentType:'text/csv',body:fixture}));
   await page.goto('/');
-  await page.waitForFunction(()=>window.SaiU&&Array.isArray(window.SaiU.timetable));
+  await page.waitForFunction(()=>window.SaiU&&Array.isArray(window.SaiU.timetable)&&window.SaiU.timetable.length>0);
 });
 
 test('home renders live timetable controls and navigation',async({page})=>{
