@@ -11,8 +11,8 @@ env:
   NODE_VERSION: 22
 
 concurrency:
-  group: production-build
-  cancel-in-progress: true
+  group: production-build-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   production:
