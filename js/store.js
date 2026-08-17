@@ -1,14 +1,15 @@
 const KEY='saiu-v2-state';
-const defaults={theme:'system',section:'SCDS 3',school:'SCDS',tasks:[],xp:0,streak:0,lastOpen:null,installDismissed:false};
+const defaults={theme:'system',section:'SCDS 3',school:'SCDS',tasks:[],xp:0,streak:0,lastOpen:null,installDismissed:false,__xpEvents:{}};
 function sanitizeState(value){
   const raw=value&&typeof value==='object'?value:{};
   return {
     ...defaults,
     ...raw,
-    tasks:Array.isArray(raw.tasks)?raw.tasks.filter(t=>t&&typeof t==='object').map(t=>({id:String(t.id||crypto.randomUUID()),title:String(t.title||'').trim(),done:Boolean(t.done),createdAt:Number(t.createdAt)||Date.now()})).filter(t=>t.title):[],
+    tasks:Array.isArray(raw.tasks)?raw.tasks.filter(t=>t&&typeof t==='object').map(t=>({id:String(t.id||globalThis.crypto?.randomUUID?.()||`${Date.now()}`),title:String(t.title||'').trim(),done:Boolean(t.done),createdAt:Number(t.createdAt)||Date.now()})).filter(t=>t.title):[],
     xp:Math.max(0,Number(raw.xp)||0),
     streak:Math.max(0,Number(raw.streak)||0),
-    theme:['system','light','dark'].includes(raw.theme)?raw.theme:'system'
+    theme:['system','light','dark'].includes(raw.theme)?raw.theme:'system',
+    __xpEvents:raw.__xpEvents&&typeof raw.__xpEvents==='object'?raw.__xpEvents:{}
   };
 }
 export function load(){try{return sanitizeState(JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return {...defaults,tasks:[]}}}
