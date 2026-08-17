@@ -2,22 +2,27 @@ import {test,expect} from '@playwright/test';
 
 const fixture=`Monday,09:00-10:00,Intelligent Embedded Systems @ Faculty A,\n, ,Room A,\nMonday,11:00-12:00,Emerging Tools and Applications @ Faculty B,\n, ,Room B,\nTuesday,10:00-11:30,Forensic Psychology @ Faculty C,\n, ,Room C,\nWednesday,14:00-15:00,Intelligent Embedded Systems @ Faculty D,\n, ,Room D,\n`;
 
-test.beforeEach(async({page})=>{
+const desktop=page=>page.locator('.sidebar-nav');
+const primaryNav=async page=>page.locator('.bottom-nav').isVisible().then(v=>v?page.locator('.bottom-nav'):desktop(page));
+
+ test.beforeEach(async({page})=>{
   await page.route('https://docs.google.com/spreadsheets/**',async route=>route.fulfill({status:200,contentType:'text/csv',body:fixture}));
   await page.goto('/');
   await page.waitForFunction(()=>window.SaiU&&Array.isArray(window.SaiU.timetable)&&window.SaiU.timetable.length>0);
 });
 
-test('home renders live timetable controls and navigation',async({page})=>{
+test('home renders live timetable controls and responsive navigation',async({page})=>{
   await expect(page).toHaveTitle('SaiU V2');
   await expect(page.locator('#main')).toContainText('Personal timetable');
   await expect(page.locator('#main')).toContainText('Live source');
-  await page.locator('.bottom-nav button[data-view="timetable"]').click();
+  const nav=await primaryNav(page);
+  await nav.getByRole('button',{name:/Timetable/}).click();
   await expect(page.locator('#main')).toContainText('Timetable');
 });
 
 test('AI local-first flow answers a timetable question without a provider',async({page})=>{
-  await page.getByRole('button',{name:'Ask AI'}).click();
+  const nav=await primaryNav(page);
+  await nav.getByRole('button',{name:/AI Assistant|AI$/}).click();
   const input=page.locator('#aiInput');
   await input.fill('What is my schedule today?');
   await page.getByRole('button',{name:'Ask',exact:true}).click();
@@ -26,7 +31,8 @@ test('AI local-first flow answers a timetable question without a provider',async
 });
 
 test('planner accepts and completes a task',async({page})=>{
-  await page.getByRole('button',{name:'Planner'}).click();
+  const nav=await primaryNav(page);
+  await nav.getByRole('button',{name:/Planner|Tasks/}).click();
   await page.locator('#taskInput').fill('Finish production audit');
   await page.getByRole('button',{name:'Add',exact:true}).click();
   await expect(page.locator('#main')).toContainText('Finish production audit');
@@ -37,7 +43,8 @@ test('planner accepts and completes a task',async({page})=>{
 test('security accessibility and performance baseline hold in a real browser',async({page})=>{
   const csp=await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
   expect(csp).toContain("script-src 'self'");
-  await expect(page.getByRole('navigation',{name:'Primary navigation'})).toBeVisible();
+  const nav=await primaryNav(page);
+  await expect(nav).toBeVisible();
   await expect(page.locator('main#main')).toHaveAttribute('tabindex','-1');
   const navigation=await page.evaluate(()=>performance.getEntriesByType('navigation')[0]);
   expect(navigation.domContentLoadedEventEnd).toBeLessThan(2000);
