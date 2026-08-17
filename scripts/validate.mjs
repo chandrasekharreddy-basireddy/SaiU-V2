@@ -4,7 +4,7 @@ import {spawnSync} from 'node:child_process';
 
 const root=process.cwd();
 const fail=[];
-const required=['index.html','manifest.json','sw.js','styles.css','README.md','SECURITY.md'];
+const required=['index.html','manifest.json','sw.js','styles.css','README.md','SECURITY.md','LICENSE'];
 for(const file of required)if(!fs.existsSync(path.join(root,file)))fail.push(`Missing required file: ${file}`);
 
 function walk(dir){const out=[];for(const entry of fs.readdirSync(dir,{withFileTypes:true})){if(['.git','node_modules'].includes(entry.name))continue;const p=path.join(dir,entry.name);if(entry.isDirectory())out.push(...walk(p));else out.push(p)}return out}
@@ -29,6 +29,7 @@ for(const ref of [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)].map(m=>m[1
   if(clean&&!fs.existsSync(path.join(root,clean)))fail.push(`Broken local HTML reference: ${ref}`);
 }
 if(/style-src[^;]*'unsafe-inline'/i.test(html))fail.push('CSP permits unsafe-inline styles');
+if(/\sstyle\s*=\s*["']/i.test(html))fail.push('Inline style attribute found in HTML');
 if(/\son[a-z]+\s*=\s*["']/i.test(html))fail.push('Inline event handler found in HTML');
 if(/javascript:/i.test(html))fail.push('javascript: URL found in HTML');
 
