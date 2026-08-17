@@ -1,6 +1,15 @@
-const CACHE='saiu-v2-v2';
-const SHELL=['./','./index.html','./styles.css','./js/app.js','./js/store.js','./js/timetable.js','./js/ai.js','./js/calendar.js','./js/notifications.js','./js/gamification.js','./js/navigation.js','./js/social.js','./js/student.js','./manifest.json'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).catch(()=>{}));self.skipWaiting()});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting()});
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==location.origin)return;e.respondWith(fetch(e.request,{cache:e.request.mode==='navigate'?'no-store':'default'}).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('./index.html')))});
+const CACHE='saiu-v2-v3';
+const SHELL=['./','./index.html','./styles.css','./js/app.js','./js/store.js','./js/timetable.js','./js/ai.js','./js/calendar.js','./js/notifications.js','./js/gamification.js','./js/navigation.js','./js/social.js','./js/student.js','./js/catalog.js','./js/remote.js','./manifest.json'];
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).catch(()=>{}));self.skipWaiting()});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
+self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
+self.addEventListener('fetch',event=>{
+ if(event.request.method!=='GET')return;
+ const url=new URL(event.request.url);
+ if(url.origin!==location.origin)return;
+ event.respondWith(
+  fetch(event.request,{cache:event.request.mode==='navigate'?'no-store':'default'})
+   .then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{})}return response})
+   .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html')))
+ );
+});
