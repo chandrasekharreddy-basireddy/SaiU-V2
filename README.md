@@ -1,59 +1,88 @@
-# SaiU V2
+# SaiU V2 — Student Operating System
 
-A next-generation, offline-first university life operating system inspired by the original [SaiU Timetable](https://github.com/y-bow/SaiU-Timetable).
+SaiU V2 is an offline-first university companion built from the audit of the original SaiU Timetable PWA. It keeps the fast timetable experience while adding a live Google Sheets source, student planning, local timetable intelligence, calendar export, notifications, sharing, gamification, and production CI/CD.
 
 ## What is included
 
-- Live current/next class intelligence
-- Weekly timetable views
-- Free-time and conflict detection
-- CSV timetable ingestion engine
-- Offline-first PWA shell
-- Light/dark/system themes
-- Local planner and XP gamification
-- Local-first Ask SaiU AI with optional HTTPS gateway
+### Phase 1 — Foundation
+- Responsive PWA UI
+- Local persistent state
+- Theme system
+- Offline service worker
+- Production CI
+
+### Phase 2 — Timetable intelligence
+- Live Google Sheets CSV ingestion
+- Original SaiU school/year catalog
+- Section-aware filtering
+- Current/next class detection
+- Conflict detection
+- Free-time engine
 - `.ics` calendar export
-- Browser notification primitives
-- Schedule sharing and comparison primitives
-- Local attendance/exam planning primitives
-- GitHub Actions tests and syntax validation
+- Offline timetable cache
 
-## Run locally
+### Phase 3 — SaiU AI
+- Local timetable assistant
+- Next-class, daily, tomorrow, free-time and conflict questions
+- Room/faculty/course lookup
+- Longest-free-slot queries
+- Optional HTTPS AI gateway
+- Provider secrets remain server-side
 
-Because this is an ES-module PWA, serve the repository over HTTP rather than opening `index.html` directly.
+### Phase 4 — Student OS
+- Planner/tasks
+- XP and progress
+- Notifications
+- Calendar
+- Persistent preferences
 
-```sh
-npx serve .
-```
+### Phase 5 — Social + gamification
+- Schedule sharing through Web Share/clipboard
+- Common-free-time engine
+- Levels and badges
+- Foundation for friend schedule comparison
 
-Then open the URL printed by the server.
+### Phase 6 — Production
+- Automated Node tests
+- Syntax validation
+- PWA validation
+- GitHub Pages deployment
+- Deployment concurrency control
+- Security policy
+- Versioned offline cache
 
-For automated checks:
+## Live timetable source
 
-```sh
+The V2 loader reads the published Sai University Google Sheet as CSV using the configured sheet ID in `js/catalog.js`. The app never requires a Google account in the browser. If the source is unreachable, the last matching cached timetable is used; a safe demo timetable is the final fallback.
+
+## Development
+
+```bash
 npm test
 npm run check
 ```
 
-## Real timetable data
+No frontend secrets are required. An optional AI endpoint can be configured in **More → AI endpoint**, and it must use HTTPS.
 
-The V2 engine exposes `loadCsv(url)` in `js/timetable.js`. Connect it to the university's published CSV endpoint after migrating the original school's/year/section mapping rules. The initial build deliberately uses sample data so the app remains runnable without a live external dependency.
+## Architecture
 
-## AI
-
-The browser assistant works without a backend. To connect a production AI gateway, set the `saiu_ai_endpoint` value from **More → AI endpoint**. The endpoint should be an HTTPS server you control. Do not put model-provider API keys in this repository or browser storage.
-
-## Six-phase roadmap
-
-1. Foundation and architecture
-2. World-class timetable intelligence
-3. SaiU AI copilot
-4. Student OS (planner, academics, notifications, calendar)
-5. Social + gamification
-6. Production quality, security and CI
-
-See [`docs/AUDIT.md`](docs/AUDIT.md) for the source audit and migration notes.
+```text
+index.html
+styles.css
+js/
+  app.js          application shell and views
+  catalog.js      SaiU school/year/source catalog
+  remote.js       live source + offline cache
+  timetable.js    parser + timetable intelligence
+  ai.js           local-first assistant + optional gateway
+  store.js        persistent student state
+  calendar.js     ICS export
+  notifications.js PWA notifications
+  gamification.js XP/levels/badges
+  navigation.js   view navigation
+sw.js             offline shell and runtime cache
+```
 
 ## License
 
-MIT-compatible application code. Verify third-party asset/data licenses before importing additional content from the original project.
+MIT.
