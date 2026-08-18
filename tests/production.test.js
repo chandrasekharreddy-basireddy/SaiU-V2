@@ -29,8 +29,7 @@ test('offline shell contains every browser module imported by bootstrap',()=>{
  const sw=read('sw.js');
  has(sw,'./js/bootstrap.js');
  has(sw,'./js/student-os.js');
- has(sw,'./icons/icon.svg');
- assert.match(sw,/saiu-v2-v6/);
+ has(sw,'./icons/icon.svg');  assert.match(sw,/saiu-v2-v8/);
 });
 
 test('performance budgets stay bounded',()=>{
