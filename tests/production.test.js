@@ -9,7 +9,7 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 
 function has(html,needle){assert.ok(html.includes(needle),`Expected ${needle}`)}
 
-test('security headers and no inline executable handlers',()=>{
+test('security headers and no inline executable handlers', ()=>{
  const html=read('index.html');
  has(html,'Content-Security-Policy');
  assert.match(html,/style-src 'self'/);
@@ -22,15 +22,15 @@ test('security headers and no inline executable handlers',()=>{
 test('manifest references an existing production icon',()=>{
  const manifest=JSON.parse(read('manifest.json'));
  assert.ok(Array.isArray(manifest.icons)&&manifest.icons.length>0);
- for(const icon of manifest.icons)assert.ok(fs.existsSync(path.join(root,icon.src.replace(/^\.\//,''))),icon.src);
+ for(const icon of manifest.icons)assert.ok(fs.existsSync(path.join(root,icon.src.replace(/^\.\/ /,''))),icon.src);
 });
 
-test('offline shell contains every browser module imported by bootstrap',()=>{
+test('offline shell contains every browser module imported by bootstrap', ()=>{
  const sw=read('sw.js');
  has(sw,'./js/bootstrap.js');
  has(sw,'./js/student-os.js');
  has(sw,'./icons/icon.svg');
- assert.match(sw,/saiu-v2-v6/);
+ assert.match(sw,/saiu-v2-v8/);
 });
 
 test('performance budgets stay bounded',()=>{
@@ -48,7 +48,7 @@ test('HTML accessibility fundamentals exist',()=>{
  has(html,'tabindex="-1"');
 });
 
-test('live timetable integration points at the configured published source',()=>{
+test('live timetable integration points at the configured published source', ()=>{
  const catalog=read('js/catalog.js');
  const remote=read('js/remote.js');
  assert.match(catalog,/docs\.google\.com\/spreadsheets\/d\//);
