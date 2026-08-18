@@ -14,7 +14,7 @@ test('security headers and no inline executable handlers', ()=>{
  has(html,'Content-Security-Policy');
  assert.match(html,/style-src 'self'/);
  assert.doesNotMatch(html,/style-src[^;]*'unsafe-inline'/i);
- assert.doesNotMatch(html,/\son[a-z]+\s*=\s*['\"]/i);
+ assert.doesNotMatch(html,/\son[a-z]+\s*=\s*['"]/i);
  assert.doesNotMatch(html,/javascript:/i);
  has(html,'icons/icon.svg');
 });
@@ -30,7 +30,7 @@ test('offline shell contains every browser module imported by bootstrap', ()=>{
  has(sw,'./js/bootstrap.js');
  has(sw,'./js/student-os.js');
  has(sw,'./icons/icon.svg');
- assert.match(sw,/saiu-v2-v7/);
+ assert.match(sw,/saiu-v2-v8/);
 });
 
 test('performance budgets stay bounded',()=>{
